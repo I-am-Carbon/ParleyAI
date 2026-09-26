@@ -1,0 +1,28 @@
+Priya Sharma
+Backend Developer | priya.sharma@example.com | github.com/priya-dev-example
+
+SUMMARY
+Backend developer with 2 years of experience building Python REST APIs and data pipelines.
+Comfortable with PostgreSQL, Docker and AWS. Enjoys debugging production issues and improving performance.
+
+EXPERIENCE
+Software Engineer, ShopLite (e-commerce startup) - Jul 2024 to present
+- Built the order-management REST API in FastAPI serving ~40k requests/day.
+- Cut p95 latency of the product search endpoint from 900ms to 180ms by adding PostgreSQL indexes and Redis caching.
+- Designed a nightly ETL pipeline (Python, Airflow) that syncs inventory from 3 supplier APIs.
+- Set up GitHub Actions CI with pytest; raised test coverage from 35% to 78%.
+
+Software Engineering Intern, DataNest Analytics - Jan 2024 to Jun 2024
+- Wrote Django admin tools for internal reporting.
+- Migrated cron jobs to Celery workers, reducing failed jobs by 60%.
+
+PROJECTS
+Campus Eats (hackathon winner, 2023) - Food pre-ordering app for college canteens.
+  Flask backend, PostgreSQL, deployed on AWS EC2 with Docker. Handled 1,200 orders in launch week.
+URL Shortener - Rate-limited URL shortener with Redis and a base62 ID generator; load tested to 2k req/s.
+
+SKILLS
+Python, FastAPI, Django, Flask, PostgreSQL, Redis, Celery, Airflow, Docker, AWS (EC2, S3, RDS), Git, pytest, Linux
+
+EDUCATION
+B.Tech in Computer Science, National Institute of Technology, 2024 - CGPA 8.4
