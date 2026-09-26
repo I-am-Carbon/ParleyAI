@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 import openai
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import config
 from app.db import init_db
@@ -81,3 +82,18 @@ async def _provider_error(_: Request, exc: openai.APIError):
 @app.get("/api/health")
 def health():
     return {"status": "ok", "model": config.LLM_MODEL_FAST, "llm_configured": bool(config.LLM_API_KEY)}
+
+
+# In production the built frontend is served from here, so the app and API share one origin.
+FRONTEND_DIST = config.BASE_DIR.parent / "frontend" / "dist"
+if FRONTEND_DIST.is_dir():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str):
+        file = FRONTEND_DIST / path
+        if path and not path.startswith("api/") and file.is_file():
+            return FileResponse(file)
+        if path.startswith("api/"):
+            return _error(404, "Not Found")
+        return FileResponse(FRONTEND_DIST / "index.html")

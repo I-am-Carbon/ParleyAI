@@ -1,0 +1,26 @@
+# Render Blueprint: one free web service that builds the React app and serves it from FastAPI.
+services:
+  - type: web
+    name: parleyai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt && cd frontend && npm ci && npm run build
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL_FAST
+        value: openai/gpt-oss-120b
+      - key: LLM_MODEL_REPORT
+        value: openai/gpt-oss-120b
+      - key: LLM_API_KEY
+        sync: false
+      - key: RECRUITER_SIGNUP_CODE
+        sync: false
+      - key: SESSION_DAYS
+        value: "7"
