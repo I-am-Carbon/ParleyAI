@@ -1,4 +1,4 @@
-# AI Interview Bot
+# ParleyAI
 
 AI-powered interview platform: resume-aware questions, adaptive spoken interviews, evaluation reports, and interview integrity monitoring. See `PROJECT_SPEC.md`.
 

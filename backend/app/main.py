@@ -22,7 +22,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="AI Interview Bot API", lifespan=lifespan)
+app = FastAPI(title="ParleyAI API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.CORS_ORIGINS,
