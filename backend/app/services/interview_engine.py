@@ -11,6 +11,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app import config
+from app.levels import level_info
 from app.models import Candidate, Interview, Job, Turn, utcnow
 from app.schemas import AnswerIn, InterviewPlan, QuestionOut, TurnEval
 from app.services import llm
@@ -35,10 +36,13 @@ def format_competencies(competencies: list[dict[str, Any]]) -> str:
 # ---------- planning ----------
 
 
-def build_plan(job: Job, profile: dict[str, Any]) -> list[dict[str, Any]]:
+def build_plan(job: Job, profile: dict[str, Any], level: str | None = None) -> list[dict[str, Any]]:
+    lvl = level_info(level)
     system = llm.render(
         "plan",
         job_title=job.title,
+        level_label=lvl["label"],
+        level_plan=lvl["plan"],
         job_description=job.description,
         competencies=format_competencies(job.competencies),
         profile=json.dumps(profile, indent=2),
@@ -161,11 +165,15 @@ def submit_answer(session: Session, interview: Interview, job: Job, answer: Answ
     topic = plan[state["topic_idx"]]
     next_topic = plan[state["topic_idx"] + 1] if state["topic_idx"] + 1 < len(plan) else None
     allowed = _allowed_decisions(interview)
+    lvl = level_info(interview.experience_level)
 
     system = llm.render(
         "turn",
         interviewer_name=config.INTERVIEWER_NAME,
         job_title=job.title,
+        level_label=lvl["label"],
+        level_plan=lvl["plan"],
+        level_scoring=lvl["scoring"],
         topic_num=state["topic_idx"] + 1,
         topic_total=len(plan),
         topic_title=topic["title"],

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select
 
 from app.db import get_session
+from app.levels import Level
 from app.deps import can_view, current_user, require_candidate, require_recruiter, results_hidden
 from app.models import Candidate, IntegrityEvent, Interview, Job, Report
 from app.schemas import AnswerIn, FinishIn, IntegrityBatch, QuestionOut, ShareIn
@@ -40,6 +41,7 @@ def _summary(session: Session, interview: Interview, job: Job, candidate: Candid
         "job_id": job.id,
         "job_title": job.title,
         "mode": interview.mode,
+        "experience_level": interview.experience_level,
         "status": interview.status,
         "created_at": interview.created_at,
         "started_at": interview.started_at,
@@ -59,6 +61,7 @@ def create_interview(
     resume: UploadFile = File(...),
     job_id: int = Form(...),
     mode: Literal["recruiter", "practice"] = Form("recruiter"),
+    experience_level: Optional[Level] = Form(None),
     session: Session = Depends(get_session),
     user: Candidate = Depends(require_candidate),
 ):
@@ -69,13 +72,13 @@ def create_interview(
 
     resume_text = extract_text(resume.filename, resume.file.read())
     profile = parse_profile(resume_text).model_dump()
-    plan = interview_engine.build_plan(job, profile)
+    plan = interview_engine.build_plan(job, profile, experience_level)
 
     user.resume_text = resume_text
     user.resume_profile = profile
     session.add(user)
 
-    interview = Interview(job_id=job.id, candidate_id=user.id, mode=mode, plan=plan)
+    interview = Interview(job_id=job.id, candidate_id=user.id, mode=mode, experience_level=experience_level, plan=plan)
     session.add(interview)
     session.commit()
     session.refresh(interview)

@@ -15,7 +15,7 @@ import {
 } from '../components/icons';
 import { Alert, Badge, Button, Card, EmptyState, Skeleton } from '../components/ui';
 import { INTERVIEWER_NAME } from '../lib/brand';
-import { firstName, formatDate, recommendationMeta, scoreColor, statusMeta } from '../lib/format';
+import { firstName, formatDate, levelLabel, recommendationMeta, scoreColor, statusMeta } from '../lib/format';
 
 interface Props {
   onNew: () => void;
@@ -165,6 +165,12 @@ export default function Dashboard({ onNew, onInterview, onReport }: Props) {
                               <span>#{i.id}</span>
                               <span className="h-1 w-1 rounded-full bg-slate-300" />
                               <span>{i.mode === 'practice' ? 'Practice' : 'Recruiter interview'}</span>
+                              {levelLabel(i.experience_level) && (
+                                <>
+                                  <span className="h-1 w-1 rounded-full bg-slate-300" />
+                                  <span>{levelLabel(i.experience_level)}</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>

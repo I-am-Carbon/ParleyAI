@@ -15,6 +15,7 @@ _ADDED_COLUMNS = {
     "interview": {
         "results_shared": "BOOLEAN NOT NULL DEFAULT 0",
         "end_reason": "VARCHAR",
+        "experience_level": "VARCHAR",
     },
 }
 

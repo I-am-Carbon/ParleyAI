@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api, Interview, session } from '../api/client';
 import { IconArrowRight, IconCheckCircle, IconClipboard, IconGauge, IconSearch, IconShieldAlert, IconUsers, type Icon } from '../components/icons';
 import { Alert, Avatar, Badge, Button, Card, EmptyState, Skeleton, cn } from '../components/ui';
-import { firstName, formatDate, recommendationMeta, scoreColor, statusMeta, type Tone } from '../lib/format';
+import { firstName, formatDate, levelLabel, recommendationMeta, scoreColor, statusMeta, type Tone } from '../lib/format';
 
 interface Props {
   onReport: (id: number) => void;
@@ -151,7 +151,10 @@ export default function RecruiterDashboard({ onReport }: Props) {
                           <Avatar name={i.candidate_name} className="ring-slate-100" />
                           <div className="min-w-0">
                             <div className="truncate font-medium text-slate-900">{i.candidate_name}</div>
-                            <div className="truncate text-xs text-slate-500">{i.job_title}</div>
+                            <div className="truncate text-xs text-slate-500">
+                              {i.job_title}
+                              {levelLabel(i.experience_level) && ` · ${levelLabel(i.experience_level)}`}
+                            </div>
                           </div>
                         </div>
                       </td>

@@ -1,4 +1,19 @@
-export type Tone = 'slate' | 'indigo' | 'emerald' | 'teal' | 'amber' | 'rose' | 'violet';
+export type ExperienceLevel = 'fresher' | 'junior' | 'mid' | 'senior';
+
+export const EXPERIENCE_LEVELS: Array<{ value: ExperienceLevel; label: string; years: string; text: string }> = [
+  { value: 'fresher', label: 'Fresher', years: '0 years', text: 'Student or new graduate. Fundamentals and projects.' },
+  { value: 'junior', label: 'Junior', years: '1–2 years', text: 'Hands-on building, debugging and tools.' },
+  { value: 'mid', label: 'Mid-level', years: '3–5 years', text: 'Design trade-offs and owning features.' },
+  { value: 'senior', label: 'Senior', years: '5+ years', text: 'Architecture, scale and leadership.' },
+];
+
+/** e.g. "Junior · 1–2 yrs" */
+export function levelLabel(level: string | null | undefined): string | null {
+  const l = EXPERIENCE_LEVELS.find((x) => x.value === level);
+  return l ? `${l.label} · ${l.years.replace('years', 'yrs')}` : null;
+}
+
+export type Tone ='slate' | 'indigo' | 'emerald' | 'teal' | 'amber' | 'rose' | 'violet';
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

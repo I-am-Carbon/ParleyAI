@@ -26,7 +26,7 @@ import { useIntegrityMonitor } from '../hooks/useIntegrityMonitor';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { INTERVIEWER_NAME } from '../lib/brand';
-import { formatClock } from '../lib/format';
+import { formatClock, levelLabel } from '../lib/format';
 
 interface Props {
   id: number;
@@ -360,6 +360,7 @@ export default function InterviewRoom({ id, onFinish, onExit }: Props) {
                 <>
                   <div className="text-xs font-medium uppercase tracking-wider text-indigo-300">
                     {detail?.mode === 'practice' ? 'Practice session' : 'Recruiter interview'}
+                    {levelLabel(detail?.experience_level) && ` · ${levelLabel(detail?.experience_level)}`}
                   </div>
                   <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{detail?.job_title ?? 'Interview'}</h1>
                   <p className="mt-2 text-sm text-slate-400">

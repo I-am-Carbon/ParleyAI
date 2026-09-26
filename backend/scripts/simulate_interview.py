@@ -65,6 +65,7 @@ def main():
     parser.add_argument("--name", default="Priya Sharma")
     parser.add_argument("--email", default="priya.sim@example.com")
     parser.add_argument("--mode", choices=["recruiter", "practice"], default="recruiter")
+    parser.add_argument("--level", choices=["fresher", "junior", "mid", "senior"], default="junior")
     parser.add_argument("--auto", action="store_true", help="let the LLM play the candidate")
     parser.add_argument("--persona", choices=list(PERSONAS), default="average")
     args = parser.parse_args()
@@ -88,7 +89,7 @@ def main():
             created = check(
                 client.post(
                     "/api/interviews",
-                    data={"job_id": args.job_id, "mode": args.mode},
+                    data={"job_id": args.job_id, "mode": args.mode, "experience_level": args.level},
                     files={"resume": (resume_path.name, f)},
                 )
             )

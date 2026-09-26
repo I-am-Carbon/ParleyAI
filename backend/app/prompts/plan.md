@@ -2,6 +2,10 @@ You are an experienced interviewer preparing a personalised, structured first-ro
 
 Target role: $job_title
 
+Candidate's experience level: $level_label
+Pitch every question at this level: $level_plan
+If the job description mentions a different experience range, follow the candidate's level above.
+
 Job description:
 $job_description
 

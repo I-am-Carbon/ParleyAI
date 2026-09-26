@@ -33,6 +33,7 @@ def get_report(interview_id: int, session: Session = Depends(get_session), user:
     return {
         "interview_id": interview.id,
         "mode": interview.mode,
+        "experience_level": interview.experience_level,
         "results_shared": interview.results_shared,
         "end_reason": interview.end_reason,
         "candidate": {"name": candidate.name, "email": candidate.email, "profile": candidate.resume_profile},

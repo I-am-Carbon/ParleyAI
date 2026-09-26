@@ -11,6 +11,7 @@ import {
   IconGraduation,
   IconHeadphones,
   IconMic,
+  IconSearch,
   IconShieldCheck,
   IconTrash,
   IconUpload,
@@ -18,6 +19,7 @@ import {
 import ProcessingOverlay from '../components/ProcessingOverlay';
 import { Alert, Button, Card, Skeleton, cn } from '../components/ui';
 import { INTERVIEWER_NAME } from '../lib/brand';
+import { EXPERIENCE_LEVELS, levelLabel, type ExperienceLevel } from '../lib/format';
 
 interface Props {
   onBack: () => void;
@@ -33,9 +35,11 @@ export default function NewInterview({ onBack, onCreated }: Props) {
 
   const [jobId, setJobId] = useState<number | ''>('');
   const [mode, setMode] = useState<'recruiter' | 'practice'>('recruiter');
+  const [level, setLevel] = useState<ExperienceLevel | ''>('');
   const [resume, setResume] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [roleQuery, setRoleQuery] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,14 +65,14 @@ export default function NewInterview({ onBack, onCreated }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!jobId || !resume) {
-      setError('Please select a job and upload your resume');
+    if (!jobId || !level || !resume) {
+      setError('Please choose a role and your experience level, and upload your resume.');
       return;
     }
 
     setSubmitting(true);
     try {
-      const data = await api.interviews.create(jobId as number, mode, resume);
+      const data = await api.interviews.create(jobId as number, mode, level, resume);
       onCreated(data.id);
     } catch (e: any) {
       setError(e.message);
@@ -78,6 +82,10 @@ export default function NewInterview({ onBack, onCreated }: Props) {
   };
 
   const selectedJob = jobs.find((j) => j.id === jobId);
+  const q = roleQuery.trim().toLowerCase();
+  const visibleJobs = q
+    ? jobs.filter((j) => [j.title, j.description, ...j.competencies.map((c) => c.name)].some((s) => s.toLowerCase().includes(q)))
+    : jobs;
 
   return (
     <div className="animate-fade-up">
@@ -95,7 +103,9 @@ export default function NewInterview({ onBack, onCreated }: Props) {
 
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Set up your interview</h1>
-        <p className="mt-1.5 text-slate-500">Three quick steps. {INTERVIEWER_NAME} will tailor every question to your resume and the role.</p>
+        <p className="mt-1.5 text-slate-500">
+          Four quick steps. {INTERVIEWER_NAME} will tailor every question to your resume, the role and your experience level.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
@@ -110,8 +120,21 @@ export default function NewInterview({ onBack, onCreated }: Props) {
                 <Skeleton className="h-36 rounded-xl" />
               </div>
             ) : (
+              <>
+              {jobs.length > 6 && (
+                <div className="relative mb-4">
+                  <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={roleQuery}
+                    onChange={(e) => setRoleQuery(e.target.value)}
+                    placeholder={`Search ${jobs.length} roles, e.g. ML, DevOps, data`}
+                    className="h-10 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-slate-900 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              )}
+              {visibleJobs.length === 0 && <p className="py-6 text-center text-sm text-slate-500">No roles match “{roleQuery}”.</p>}
               <div className="grid gap-3 sm:grid-cols-2" role="radiogroup">
-                {jobs.map((j) => {
+                {visibleJobs.map((j) => {
                   const active = j.id === jobId;
                   return (
                     <button
@@ -156,11 +179,40 @@ export default function NewInterview({ onBack, onCreated }: Props) {
                   );
                 })}
               </div>
+              </>
             )}
           </Section>
 
-          {/* Step 2: resume */}
-          <Section step={2} title="Upload your resume" description="PDF, DOCX or TXT. Questions will reference your projects and experience.">
+          {/* Step 2: experience level */}
+          <Section step={2} title="Your experience level" description="Questions and scoring are pitched at this level.">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4" role="radiogroup">
+              {EXPERIENCE_LEVELS.map((l) => {
+                const active = level === l.value;
+                return (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    key={l.value}
+                    onClick={() => setLevel(l.value)}
+                    className={cn(
+                      'flex flex-col rounded-xl p-4 text-left ring-1 ring-inset transition-all',
+                      active ? 'bg-indigo-50/60 ring-2 ring-indigo-500' : 'bg-white ring-slate-200 hover:bg-slate-50 hover:ring-slate-300',
+                    )}
+                  >
+                    <span className={cn('text-xs font-semibold uppercase tracking-wider', active ? 'text-indigo-600' : 'text-slate-400')}>
+                      {l.years}
+                    </span>
+                    <span className="mt-1 font-medium text-slate-900">{l.label}</span>
+                    <span className="mt-1 text-xs leading-relaxed text-slate-500">{l.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Section>
+
+          {/* Step 3: resume */}
+          <Section step={3} title="Upload your resume" description="PDF, DOCX or TXT. Questions will reference your projects and experience.">
             <input
               ref={fileInput}
               type="file"
@@ -223,8 +275,8 @@ export default function NewInterview({ onBack, onCreated }: Props) {
             )}
           </Section>
 
-          {/* Step 3: mode */}
-          <Section step={3} title="Choose a mode" description="You can practice as many times as you like.">
+          {/* Step 4: mode */}
+          <Section step={4} title="Choose a mode" description="You can practice as many times as you like.">
             <div className="grid gap-3 sm:grid-cols-2" role="radiogroup">
               {(
                 [
@@ -276,15 +328,20 @@ export default function NewInterview({ onBack, onCreated }: Props) {
               <h3 className="text-[15px] font-semibold text-slate-900">Interview summary</h3>
               <dl className="mt-5 space-y-4 text-sm">
                 <SummaryRow label="Role" value={selectedJob?.title} />
+                <SummaryRow label="Experience" value={levelLabel(level) ?? undefined} />
                 <SummaryRow label="Resume" value={resume?.name} />
                 <SummaryRow label="Mode" value={mode === 'practice' ? 'Practice session' : 'Recruiter interview'} />
                 <SummaryRow label="Duration" value="About 15–20 minutes" icon={<IconClock className="h-3.5 w-3.5 text-slate-400" />} />
               </dl>
-              <Button type="submit" size="lg" className="mt-6 w-full" loading={submitting} disabled={!jobId || !resume}>
+              <Button type="submit" size="lg" className="mt-6 w-full" loading={submitting} disabled={!jobId || !level || !resume}>
                 {submitting ? 'Preparing…' : 'Create & start interview'}
                 {!submitting && <IconArrowRight />}
               </Button>
-              {(!jobId || !resume) && <p className="mt-3 text-center text-xs text-slate-400">Select a role and upload your resume to continue.</p>}
+              {(!jobId || !level || !resume) && (
+                <p className="mt-3 text-center text-xs text-slate-400">
+                  {!level ? 'Choose your experience level to continue.' : 'Upload your resume to continue.'}
+                </p>
+              )}
             </Card>
 
             <Card className="p-6">

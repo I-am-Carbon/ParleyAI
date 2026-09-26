@@ -54,6 +54,7 @@ export interface Interview {
   job_id: number;
   job_title: string;
   mode: 'recruiter' | 'practice';
+  experience_level: string | null;
   status: 'created' | 'in_progress' | 'completed';
   created_at: string;
   started_at: string | null;
@@ -96,6 +97,7 @@ export interface Question {
 export interface Report {
   interview_id: number;
   mode: string;
+  experience_level: string | null;
   results_shared: boolean;
   end_reason: 'looking_away' | 'no_face' | 'multiple_faces' | null;
   candidate: { name: string; email: string | null; profile: any };
@@ -208,8 +210,8 @@ export const api = {
     list(): Promise<Interview[]> {
       return request('GET', '/api/interviews');
     },
-    create(job_id: number, mode: 'recruiter' | 'practice', resume: File): Promise<any> {
-      return request('POST', '/api/interviews', { job_id, mode }, resume);
+    create(job_id: number, mode: 'recruiter' | 'practice', experience_level: string, resume: File): Promise<any> {
+      return request('POST', '/api/interviews', { job_id, mode, experience_level }, resume);
     },
     get(id: number): Promise<InterviewDetail> {
       return request('GET', `/api/interviews/${id}`);

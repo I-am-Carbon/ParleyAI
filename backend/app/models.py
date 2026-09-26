@@ -36,6 +36,7 @@ class Interview(SQLModel, table=True):
     job_id: int = Field(foreign_key="job.id", index=True)
     candidate_id: int = Field(foreign_key="candidate.id", index=True)
     mode: str = "recruiter"  # recruiter | practice
+    experience_level: Optional[str] = None  # fresher | junior | mid | senior (see app/levels.py)
     status: str = "created"  # created | in_progress | completed
     # [{competency, title, resume_evidence, opening_question}]
     plan: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))

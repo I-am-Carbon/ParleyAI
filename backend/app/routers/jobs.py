@@ -24,7 +24,7 @@ def create_job(body: JobCreate, session: Session = Depends(get_session), _: Cand
 
 @router.get("", response_model=list[Job])
 def list_jobs(session: Session = Depends(get_session)):
-    return session.exec(select(Job).order_by(Job.id.desc())).all()
+    return session.exec(select(Job).order_by(Job.id)).all()
 
 
 @router.get("/{job_id}", response_model=Job)

@@ -8,6 +8,7 @@ import {
   IconClock,
   IconEyeOff,
   IconFile,
+  IconGraduation,
   IconLock,
   IconMessage,
   IconPrinter,
@@ -25,7 +26,7 @@ import {
 } from '../components/icons';
 import { Alert, Avatar, Badge, Button, Card, CardHeader, EmptyState, ScoreRing, Skeleton, cn } from '../components/ui';
 import { INTERVIEWER_NAME } from '../lib/brand';
-import { formatClock, formatDate, formatDuration, recommendationMeta, scoreBarClass } from '../lib/format';
+import { formatClock, formatDate, formatDuration, levelLabel, recommendationMeta, scoreBarClass } from '../lib/format';
 
 interface Props {
   id: number;
@@ -186,6 +187,7 @@ export default function ReportPage({ id, onBack }: Props) {
                 {answered.length} answer{answered.length === 1 ? '' : 's'}
               </Meta>
               <Meta icon={IconFile}>{practice ? 'Practice session' : 'Recruiter interview'}</Meta>
+              {levelLabel(report.experience_level) && <Meta icon={IconGraduation}>{levelLabel(report.experience_level)}</Meta>}
             </div>
           </div>
 

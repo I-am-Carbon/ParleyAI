@@ -19,7 +19,11 @@ from app.services import llm
 RESUME = Path(__file__).resolve().parent.parent / "samples" / "sample_resume.txt"
 
 
+PROMPTS: list[tuple[str, str]] = []  # (schema name, system prompt) for every fake LLM call
+
+
 def fake_complete_json(system, user, schema, **kwargs):
+    PROMPTS.append((schema.__name__, system))
     if schema is ResumeProfile:
         return ResumeProfile(name="Priya Sharma", skills=["Python", "FastAPI"])
     if schema is InterviewPlan:
@@ -234,6 +238,36 @@ def test_auto_ended_face_not_visible(client):
     other = create_interview(client, token)["id"]
     client.post(f"/api/interviews/{other}/start", headers=auth(token))
     assert client.post(f"/api/interviews/{other}/finish", json={"reason": "sneezed"}, headers=auth(token)).status_code == 422
+
+
+def test_experience_level_shapes_prompts(client):
+    token = signup(client)
+    PROMPTS.clear()
+    with RESUME.open("rb") as f:
+        resp = client.post(
+            "/api/interviews",
+            data={"job_id": 1, "mode": "practice", "experience_level": "senior"},
+            files={"resume": ("resume.txt", f)},
+            headers=auth(token),
+        )
+    assert resp.status_code == 200, resp.text
+    iid = resp.json()["id"]
+    assert resp.json()["experience_level"] == "senior"
+    client.post(f"/api/interviews/{iid}/start", headers=auth(token))
+    client.post(f"/api/interviews/{iid}/answer", json={"transcript": "An answer"}, headers=auth(token))
+    client.post(f"/api/interviews/{iid}/finish", headers=auth(token))
+
+    by_schema = {name: prompt for name, prompt in PROMPTS}
+    for name in ("InterviewPlan", "TurnEval", "EvaluationReport"):
+        assert "5+ years of experience (senior)" in by_schema[name], name
+    assert "system design at scale" in by_schema["InterviewPlan"]
+    assert client.get(f"/api/interviews/{iid}/report", headers=auth(token)).json()["experience_level"] == "senior"
+
+    # Unknown levels are rejected; leaving it out still works.
+    with RESUME.open("rb") as f:
+        bad = client.post("/api/interviews", data={"job_id": 1, "experience_level": "wizard"}, files={"resume": ("r.txt", f)}, headers=auth(token))
+    assert bad.status_code == 422
+    assert create_interview(client, token)["experience_level"] is None
 
 
 def test_cannot_share_before_finished(client):

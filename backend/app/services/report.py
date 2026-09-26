@@ -11,6 +11,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app import config
+from app.levels import level_info
 from app.models import Candidate, IntegrityEvent, Interview, Job, Report
 from app.schemas import EvaluationReport
 from app.services import integrity, llm
@@ -76,9 +77,12 @@ def generate_report(session: Session, interview: Interview, job: Job, candidate:
     transcript = _transcript(session, interview)
     competencies = _competencies(job, interview)
     if transcript:
+        lvl = level_info(interview.experience_level)
         system = llm.render(
             "report",
             job_title=job.title,
+            level_label=lvl["label"],
+            level_scoring=lvl["scoring"],
             job_description=job.description,
             competencies=format_competencies(competencies),
             profile=json.dumps(candidate.resume_profile, indent=2),
